@@ -7,7 +7,7 @@ Small Python toolkit that connects **one-letter peptide sequences** to **RDKit m
 - **Standard 20 L-amino acids** only (validated single-letter alphabet).
 - **Linear peptides**: each extension couples the chain **C-terminal carboxyl** to the incoming residue **α-amine** using RDKit reaction SMARTS (handles **Gly** and **Pro** as distinct cases).
 - **Asp / Glu**: side-chain carboxylates are represented as **methyl esters in the building blocks** so backbone coupling stays **regioselective**. After assembly, methyl esters are **hydrolyzed back to acids by default** (`hydrolyze_sidechains=True` in `sequence_to_rdkit_mol` / `sequence_to_smiles`).
-- **Out of scope** (honest limits): cyclization, disulfides, PTMs, non-natural residues, explicit pH / ionization states, and stereochemistry beyond the templates embedded in the SMILES building blocks.
+
 
 ## Setup
 
