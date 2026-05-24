@@ -26,6 +26,12 @@ def test_validate_sequence_normalizes():
     assert out["sequence"] == "ACY"
 
 
+def test_validate_sequence_whitespace_only_invalid():
+    out = validate_sequence("   ")
+    assert out["valid"] is False
+    assert out["sequence"] == ""
+
+
 def test_classify_sequence_invalid():
     assert classify_sequence("B")["valid"] is False
 

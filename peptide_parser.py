@@ -200,8 +200,10 @@ _RXN_AMIDE_GLY = rdChemReactions.ReactionFromSmarts(
 _RXN_AMIDE_PRO = rdChemReactions.ReactionFromSmarts(
     "[C:1](=[O:2])[OH1].[N;H1;R:3][C:4]>>[C:1](=[O:2])[N;H0;R:3][C:4]"
 )
+# Methyl carbon is mapped to a methane by-product so RDKit does not warn about
+# unmapped reactant atoms (the previous single-product SMARTS left [CH3] unmapped).
 _RXN_ME_ESTER_HYDROLYSIS = rdChemReactions.ReactionFromSmarts(
-    "[C:1](=[O:2])[O:3][CH3]>>[C:1](=[O:2])[O;H1]"
+    "[C:1](=[O:2])[O:3][CH3:4]>>[C:1](=[O:2])[OH1:3].[CH4:4]"
 )
 
 
@@ -278,6 +280,13 @@ def validate_sequence(sequence: str) -> Dict[str, Any]:
         }
 
     sequence = sequence.upper().strip()
+
+    if not sequence:
+        return {
+            "valid": False,
+            "sequence": "",
+            "invalid_residues": [],
+        }
 
     invalid = sorted(set([aa for aa in sequence if aa not in STANDARD_AAS]))
 
@@ -535,11 +544,12 @@ if __name__ == "__main__":
     print("\nSequence Length")
     print(get_sequence_length(sequence))
 
-    print("\nCanonical SMILES")
-    smiles = "CC(O)C"
-    print(canonicalize_smiles(smiles))
+    print("\nCanonical SMILES (small-molecule demo, not the peptide)")
+    demo_smiles = "CC(O)C"
+    print(f"  input:  {demo_smiles}")
+    print(f"  output: {canonicalize_smiles(demo_smiles)}")
 
-    print("\nSequence to SMILES")
+    print("\nPeptide SMILES (from sequence)")
     print(sequence_to_smiles(sequence))
 
     print("\nAA Summary")

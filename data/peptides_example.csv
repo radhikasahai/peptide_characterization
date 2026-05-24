@@ -1,0 +1,4 @@
+id,sequence,smiles,notes
+gly_dipeptide,GG,NCC(=O)NCC(=O)O,short test peptide
+motif_rgd,RGD,,build SMILES from sequence
+demo_acydekgp,ACYDEKGP,,streamlit demo sequence

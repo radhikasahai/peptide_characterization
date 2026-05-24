@@ -12,7 +12,10 @@ from rdkit.Chem.Draw import MolToImage
 from rdkit.Chem.rdFingerprintGenerator import GetMorganGenerator
 from rdkit.DataStructs.cDataStructs import TanimotoSimilarity
 
-from typing import Dict, Optional, List
+import csv
+import re
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 from chem_utils import canonicalize_smiles, smiles_to_mol, validate_smiles
 
@@ -290,6 +293,223 @@ def batch_calculate_descriptors(smiles_list: List[str]):
         results.append(result)
 
     return results
+
+
+# ============================================================
+# CSV export (peptide library assets)
+# ============================================================
+
+_FILENAME_SAFE = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def _sanitize_export_id(raw_id: str, fallback: str = "peptide") -> str:
+    cleaned = _FILENAME_SAFE.sub("_", raw_id.strip())
+    return cleaned or fallback
+
+
+def _resolve_smiles_from_row(
+    row: Dict[str, str],
+    *,
+    hydrolyze_sidechains: bool = True,
+) -> tuple[Optional[str], List[str]]:
+    """
+    Return (smiles, errors). Uses ``smiles`` column first, else builds from ``sequence``.
+    """
+    errors: List[str] = []
+    smiles = (row.get("smiles") or "").strip()
+    if smiles:
+        if not validate_smiles(smiles):
+            errors.append("invalid SMILES in CSV")
+            return None, errors
+        canonical = canonicalize_smiles(smiles)
+        return canonical, errors
+
+    sequence = (row.get("sequence") or "").strip()
+    if not sequence:
+        errors.append("missing smiles and sequence")
+        return None, errors
+
+    from peptide_parser import sequence_to_smiles
+
+    built = sequence_to_smiles(sequence, hydrolyze_sidechains=hydrolyze_sidechains)
+    if built is None:
+        errors.append("could not build SMILES from sequence")
+        return None, errors
+    return built, errors
+
+
+def export_peptides_from_csv(
+    csv_path: Union[str, Path],
+    output_dir: Union[str, Path],
+    *,
+    hydrolyze_sidechains: bool = True,
+    skip_3d: bool = False,
+    write_grid: bool = False,
+    write_descriptor_summary: bool = True,
+) -> Dict[str, Any]:
+    """
+    Read a peptide CSV and write per-row assets (same pattern as the aspirin demo).
+
+    For each valid row writes under ``output_dir``:
+
+    - ``{id}.png`` — 2D depiction
+    - ``{id}_3d.sdf`` — 3D conformer (UFF), unless ``skip_3d=True``
+    - ``{id}_ligand.sdf`` — docking-style 3D (MMFF), unless ``skip_3d=True``
+
+    Also writes ``export_summary.csv`` in ``output_dir`` with per-row status.
+
+    CSV columns (header row):
+
+    - **id** or **name** (required): used for filenames
+    - **smiles** (recommended): canonical or valid SMILES
+    - **sequence** (optional): used when ``smiles`` is empty; built via ``sequence_to_smiles``
+    """
+    csv_path = Path(csv_path)
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if not csv_path.is_file():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
+
+    results: List[Dict[str, Any]] = []
+    smiles_for_grid: List[str] = []
+
+    with csv_path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames is None:
+            raise ValueError("CSV has no header row")
+
+        fieldnames_lower = {f.lower(): f for f in reader.fieldnames}
+        if "id" not in fieldnames_lower and "name" not in fieldnames_lower:
+            raise ValueError("CSV must include an 'id' or 'name' column")
+        if "smiles" not in fieldnames_lower and "sequence" not in fieldnames_lower:
+            raise ValueError("CSV must include 'smiles' and/or 'sequence' column")
+
+        id_key = fieldnames_lower.get("id") or fieldnames_lower.get("name")
+        for index, row in enumerate(reader):
+            raw_id = row.get(id_key, "") if id_key else ""
+            if not raw_id:
+                raw_id = f"row_{index + 1}"
+            pep_id = _sanitize_export_id(str(raw_id), fallback=f"row_{index + 1}")
+
+            entry: Dict[str, Any] = {
+                "id": pep_id,
+                "smiles": "",
+                "png": False,
+                "sdf_3d": False,
+                "ligand_sdf": False,
+                "errors": [],
+            }
+
+            smiles, resolve_errors = _resolve_smiles_from_row(
+                row,
+                hydrolyze_sidechains=hydrolyze_sidechains,
+            )
+            entry["errors"].extend(resolve_errors)
+
+            if smiles is None:
+                results.append(entry)
+                continue
+
+            entry["smiles"] = smiles
+            png_path = output_dir / f"{pep_id}.png"
+            sdf_3d_path = output_dir / f"{pep_id}_3d.sdf"
+            ligand_path = output_dir / f"{pep_id}_ligand.sdf"
+
+            entry["png"] = save_molecule_image(smiles, str(png_path))
+            if not entry["png"]:
+                entry["errors"].append("failed to save PNG")
+
+            if not skip_3d:
+                entry["sdf_3d"] = generate_3d_conformer(smiles, str(sdf_3d_path))
+                if not entry["sdf_3d"]:
+                    entry["errors"].append("3D embed/UFF failed")
+                entry["ligand_sdf"] = prepare_ligand_for_docking(
+                    smiles, str(ligand_path)
+                )
+                if not entry["ligand_sdf"]:
+                    entry["errors"].append("docking prep/MMFF failed")
+            else:
+                entry["sdf_3d"] = None
+                entry["ligand_sdf"] = None
+
+            if entry["png"]:
+                smiles_for_grid.append(smiles)
+
+            results.append(entry)
+
+    if write_grid and smiles_for_grid:
+        save_grid_image(smiles_for_grid, str(output_dir / "library_grid.png"))
+
+    if write_descriptor_summary:
+        _write_descriptor_summary_csv(results, output_dir / "descriptors_summary.csv")
+
+    summary_path = output_dir / "export_summary.csv"
+    _write_export_summary_csv(results, summary_path)
+
+    exported = sum(
+        1
+        for r in results
+        if r["png"] and (skip_3d or (r["sdf_3d"] and r["ligand_sdf"]))
+    )
+    partial = sum(1 for r in results if r["png"] and r["errors"])
+    failed = len(results) - exported - partial
+
+    return {
+        "csv_path": str(csv_path),
+        "output_dir": str(output_dir),
+        "results": results,
+        "summary": {
+            "total": len(results),
+            "fully_exported": exported,
+            "partial": partial,
+            "failed": failed,
+            "export_summary_csv": str(summary_path),
+        },
+    }
+
+
+def _write_export_summary_csv(results: List[Dict[str, Any]], path: Path) -> None:
+    fieldnames = [
+        "id",
+        "smiles",
+        "png",
+        "sdf_3d",
+        "ligand_sdf",
+        "errors",
+    ]
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in results:
+            writer.writerow(
+                {
+                    "id": row["id"],
+                    "smiles": row.get("smiles", ""),
+                    "png": row["png"],
+                    "sdf_3d": row.get("sdf_3d"),
+                    "ligand_sdf": row.get("ligand_sdf"),
+                    "errors": "; ".join(row.get("errors") or []),
+                }
+            )
+
+
+def _write_descriptor_summary_csv(results: List[Dict[str, Any]], path: Path) -> None:
+    rows_with_smiles = [r for r in results if r.get("smiles")]
+    if not rows_with_smiles:
+        return
+
+    desc_rows = batch_calculate_descriptors([r["smiles"] for r in rows_with_smiles])
+    for meta, desc in zip(rows_with_smiles, desc_rows):
+        desc["id"] = meta["id"]
+
+    fieldnames = ["id", "smiles", "valid"] + sorted(
+        k for k in desc_rows[0].keys() if k not in ("id", "smiles", "valid")
+    )
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(desc_rows)
 
 
 # ============================================================

@@ -1,4 +1,4 @@
-"""Streamlit UI for peptide sequence characterization (portfolio / demo site)."""
+"""Streamlit UI for peptide sequence characterization (demo site)."""
 
 from __future__ import annotations
 
@@ -8,11 +8,14 @@ from typing import Any, Dict
 import streamlit as st
 from rdkit.Chem.Draw import MolToImage
 
-from peptide_parser import (
-    classify_sequence,
-    sequence_to_rdkit_mol,
-    sequence_to_smiles,
-    validate_sequence,
+from benchmark_data import benchmark_summary, load_valid_examples
+from peptide_parser import classify_sequence, validate_sequence
+from peptide_synthesis import (
+    build_peptide,
+    combinatorial_library,
+    from_motif,
+    library_summary,
+    random_sequence,
 )
 from peptide_visual import calculate_basic_descriptors
 
@@ -31,15 +34,94 @@ def main() -> None:
         layout="wide",
     )
     st.title("Peptide characterization")
+    summary = benchmark_summary()
     st.markdown(
         "Built with **RDKit**: validation and composition from sequence, "
         "linear peptide assembly via **amide coupling**, optional Asp/Glu "
-        "**side-chain methyl protection** during assembly (documented in the README)."
+        "**side-chain methyl protection** during assembly (documented in the README). "
+        f"Regression benchmark: **{summary['valid']}** valid and "
+        f"**{summary['invalid']}** invalid sequences (`data/benchmark_sequences.csv`)."
     )
+
+    examples = load_valid_examples()
+    example_by_id = {row["id"]: row for row in examples}
+    example_ids = sorted(example_by_id.keys())
+
+    if "seq_input" not in st.session_state:
+        st.session_state.seq_input = "ACYDEKGP"
+
+    picked = st.selectbox(
+        "Load benchmark example",
+        options=["— custom —", *example_ids],
+        format_func=lambda eid: (
+            "— custom —"
+            if eid == "— custom —"
+            else f"{eid} — {example_by_id[eid]['notes']}"
+        ),
+    )
+    if picked != "— custom —":
+        st.session_state.seq_input = example_by_id[picked]["sequence"]
+
+    with st.expander("Generate synthetic sequence (Phase 1)"):
+        gen_mode = st.radio(
+            "Mode",
+            ["Random", "Motif repeat", "Combinatorial"],
+            horizontal=True,
+        )
+
+        if gen_mode == "Random":
+            syn_length = st.number_input(
+                "Length", min_value=1, max_value=100, value=8, key="syn_random_len"
+            )
+        elif gen_mode == "Motif repeat":
+            st.text_input("Motif", value="RGD", key="syn_motif")
+            st.number_input("Repeats", min_value=1, max_value=20, value=2, key="syn_repeats")
+            st.text_input("N-term flank", value="A", key="syn_flank")
+        else:
+            st.text_input("Base sequence", value="AAAAA", key="syn_base")
+            st.number_input(
+                "Vary position (1-based)",
+                min_value=1,
+                max_value=50,
+                value=3,
+                key="syn_pos",
+            )
+            st.text_input("Allowed AAs at position", value="DE", key="syn_allowed")
+
+        if st.button("Generate and use sequence"):
+            try:
+                if gen_mode == "Random":
+                    st.session_state.seq_input = random_sequence(
+                        int(st.session_state.syn_random_len)
+                    )
+                elif gen_mode == "Motif repeat":
+                    st.session_state.seq_input = from_motif(
+                        st.session_state.syn_motif,
+                        repeats=int(st.session_state.syn_repeats),
+                        n_term_flank=st.session_state.syn_flank,
+                    )
+                else:
+                    variants = combinatorial_library(
+                        st.session_state.syn_base,
+                        {int(st.session_state.syn_pos): st.session_state.syn_allowed},
+                        max_variants=50,
+                    )
+                    st.session_state.seq_input = variants[0]
+                    st.session_state.syn_variants = variants
+                st.rerun()
+            except ValueError as exc:
+                st.error(str(exc))
+
+        if gen_mode == "Combinatorial" and st.session_state.get("syn_variants"):
+            st.caption(
+                f"Library: {len(st.session_state.syn_variants)} sequences "
+                "(first loaded in input)."
+            )
+            st.json(library_summary(build_peptide_library(st.session_state.syn_variants[:10])))
 
     seq = st.text_input(
         "One-letter amino acid sequence",
-        value="ACYDEKGP",
+        key="seq_input",
         help="Standard 20 L-amino acids. Spaces are stripped; sequence is uppercased.",
     ).strip()
 
@@ -62,9 +144,14 @@ def main() -> None:
         )
         return
 
+    built = build_peptide(seq, hydrolyze_sidechains=hydrolyze)
+    if not built["valid"]:
+        st.error("Build failed: " + "; ".join(built["errors"]))
+        return
+
     classification = classify_sequence(seq)
-    smiles = sequence_to_smiles(seq, hydrolyze_sidechains=hydrolyze)
-    mol = sequence_to_rdkit_mol(seq, hydrolyze_sidechains=hydrolyze)
+    smiles = built["smiles"]
+    mol = built["mol"]
 
     with col_a:
         st.subheader("Composition")

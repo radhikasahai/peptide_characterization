@@ -1,0 +1,48 @@
+id,sequence,expect_valid,expect_smiles,hydrolyze_sidechains,expect_length,expect_hydrophobic_count,expect_charged_count,expect_positive_count,expect_negative_count,expect_polar_count,expect_aromatic_count,tags,notes
+empty,,false,,true,,,,,,,,"validation,invalid",empty input
+whitespace_only,   ,false,,true,,,,,,,,"validation,invalid",whitespace only
+invalid_B,AB,false,,true,,,,,,,,"validation,invalid",unsupported B
+invalid_X,AX,false,,true,,,,,,,,"validation,invalid",unsupported X
+invalid_Z,AZ,false,,true,,,,,,,,"validation,invalid",unsupported Z
+invalid_U,AU,false,,true,,,,,,,,"validation,invalid",unsupported U
+invalid_mixed,ACXB,false,,true,,,,,,,,"validation,invalid",mixed valid and invalid
+invalid_only_xxx,XXX,false,,true,,,,,,,,"validation,invalid",all invalid
+normalize_lowercase,  acy  ,true,C[C@H](N)C(=O)N[C@@H](CS)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)O,true,3,1,0,0,0,2,1,"validation,normalize",strip and uppercase
+gly_single,G,true,NCC(=O)O,true,1,1,0,0,0,0,0,gly,single glycine
+gly_dipeptide,GG,true,NCC(=O)NCC(=O)O,true,2,2,0,0,0,0,0,gly,gly-gly
+gly_tri,GGG,true,NCC(=O)NCC(=O)NCC(=O)O,true,3,3,0,0,0,0,0,gly,gly trimer
+pro_single,P,true,O=C(O)C1CCCN1,true,1,1,0,0,0,0,0,pro,single proline
+ala_pro,AP,true,C[C@H](N)C(=O)N1CCCC1C(=O)O,true,2,2,0,0,0,0,0,pro,ala-pro
+pro_gly,PG,true,O=C(O)CNC(=O)C1CCCN1,true,2,2,0,0,0,0,0,pro,pro-gly
+gly_pro,GP,true,NCC(=O)N1CCCC1C(=O)O,true,2,2,0,0,0,0,0,pro,gly-pro
+pro_pro,PP,true,O=C(O)C1CCCN1C(=O)C1CCCN1,true,2,2,0,0,0,0,0,pro,pro-pro
+asp_glu_de,DE,true,N[C@@H](CC(=O)O)C(=O)N[C@@H](CCC(=O)O)C(=O)O,true,2,0,2,0,2,0,0,"charged,asp_glu",asp-glu dipeptide hydrolyzed
+asp_glu_de_protected,DE,true,COC(=O)CC[C@H](NC(=O)[C@@H](N)CC(=O)OC)C(=O)O,false,2,0,2,0,2,0,0,"charged,asp_glu,protected",asp-glu with methyl esters retained
+asp_ala_da,DA,true,C[C@H](NC(=O)[C@@H](N)CC(=O)O)C(=O)O,true,2,1,1,0,1,0,0,"charged,asp_glu",asp-ala
+ala_asp_ad,AD,true,C[C@H](N)C(=O)N[C@@H](CC(=O)O)C(=O)O,true,2,1,1,0,1,0,0,"charged,asp_glu",ala-asp
+asp_asp_dd,DD,true,N[C@@H](CC(=O)O)C(=O)N[C@@H](CC(=O)O)C(=O)O,true,2,0,2,0,2,0,0,"charged,asp_glu",asp-asp
+glu_glu_ee,EE,true,N[C@@H](CCC(=O)O)C(=O)N[C@@H](CCC(=O)O)C(=O)O,true,2,0,2,0,2,0,0,"charged,asp_glu",glu-glu
+glu_lys_ek,EK,true,NCCCC[C@H](NC(=O)[C@@H](N)CCC(=O)O)C(=O)O,true,2,0,2,1,1,0,0,"charged,asp_glu",glu-lys
+lys_glu_ke,KE,true,NCCCC[C@H](N)C(=O)N[C@@H](CCC(=O)O)C(=O)O,true,2,0,2,1,1,0,0,"charged,asp_glu",lys-glu
+asp_in_motif,RGD,true,N=C(N)NCCC[C@H](N)C(=O)NCC(=O)N[C@@H](CC(=O)O)C(=O)O,true,3,1,2,1,1,0,0,"charged,asp_glu,motif",RGD integrin motif
+lys_tetramer,KKKK,true,NCCCC[C@H](NC(=O)[C@H](CCCCN)NC(=O)[C@H](CCCCN)NC(=O)[C@@H](N)CCCCN)C(=O)O,true,4,0,4,4,0,0,0,charged,poly-lys
+arg_dipeptide,RR,true,N=C(N)NCCC[C@H](NC(=O)[C@@H](N)CCCNC(=N)N)C(=O)O,true,2,0,2,2,0,0,0,charged,arg-arg
+aromatic_tri,FWY,true,N[C@@H](Cc1ccccc1)C(=O)N[C@@H](Cc1c[nH]c2ccccc12)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)O,true,3,0,0,0,0,1,3,aromatic,phe-trp-tyr
+charged_cluster,HKRDE,true,N=C(N)NCCC[C@H](NC(=O)[C@H](CCCCN)NC(=O)[C@@H](N)Cc1cnc[nH]1)C(=O)N[C@@H](CC(=O)O)C(=O)N[C@@H](CCC(=O)O)C(=O)O,true,5,0,5,3,2,0,0,charged,mixed charged
+demo_acydekgp,ACYDEKGP,true,C[C@H](N)C(=O)N[C@@H](CS)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@@H](CC(=O)O)C(=O)N[C@@H](CCC(=O)O)C(=O)N[C@@H](CCCCN)C(=O)NCC(=O)N1CCCC1C(=O)O,true,8,3,3,1,2,2,1,motif,streamlit default demo
+all_twenty_once,ARNDCQEGHILKMFPSTWYV,true,CCC(C)[C@H](NC(=O)[C@H](Cc1cnc[nH]1)NC(=O)CNC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CCC(N)=O)NC(=O)[C@H](CS)NC(=O)[C@H](CC(=O)O)NC(=O)[C@H](CC(N)=O)NC(=O)[C@H](CCCNC(=N)N)NC(=O)[C@H](C)N)C(=O)N[C@@H](CC(C)C)C(=O)N[C@@H](CCCCN)C(=O)N[C@@H](CCSC)C(=O)N[C@@H](Cc1ccccc1)C(=O)N1CCCC1C(=O)N[C@@H](CO)C(=O)N[C@H](C(=O)N[C@@H](Cc1c[nH]c2ccccc12)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)N[C@H](C(=O)O)C(C)C)C(C)O,true,20,7,5,3,2,6,3,motif,each standard AA once
+ala_core,AAAA,true,C[C@H](N)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)O,true,4,4,0,0,0,0,0,hydrophobic,poly-ala
+val_leu_ile,VLI,true,CCC(C)[C@H](NC(=O)[C@H](CC(C)C)NC(=O)[C@@H](N)C(C)C)C(=O)O,true,3,3,0,0,0,0,0,hydrophobic,branched aliphatic
+cys_pair,CC,true,N[C@@H](CS)C(=O)N[C@@H](CS)C(=O)O,true,2,0,0,0,0,2,0,polar,cys-cys (no disulfide)
+asn_gln,NQ,true,NC(=O)CC[C@H](NC(=O)[C@@H](N)CC(N)=O)C(=O)O,true,2,0,0,0,0,2,0,polar,asn-gln
+ser_thr,ST,true,CC(O)[C@H](NC(=O)[C@@H](N)CO)C(=O)O,true,2,0,0,0,0,2,0,polar,ser-thr
+met_phe,MF,true,CSCC[C@H](N)C(=O)N[C@@H](Cc1ccccc1)C(=O)O,true,2,1,0,0,0,0,1,"hydrophobic,aromatic",met-phe
+trp_tyr,WY,true,N[C@@H](Cc1c[nH]c2ccccc12)C(=O)N[C@@H](Cc1ccc(O)cc1)C(=O)O,true,2,0,0,0,0,1,2,aromatic,trp-tyr
+his_middle,AHA,true,C[C@H](N)C(=O)N[C@@H](Cc1cnc[nH]1)C(=O)N[C@@H](C)C(=O)O,true,3,2,1,1,0,0,0,charged,his between ala
+stress_30_ala,AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,true,C[C@H](N)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)N[C@@H](C)C(=O)O,true,30,30,0,0,0,0,0,stress,30-residue poly-alanine
+stress_50_mixed,ACDEFGHIKLMNPQRSTVWYACDEFGHIKLMNPQRSTVWYACDEFGHIKL,true,CCC(C)[C@H](NC(=O)[C@H](Cc1cnc[nH]1)NC(=O)CNC(=O)[C@H](Cc1ccccc1)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CC(=O)O)NC(=O)[C@H](CS)NC(=O)[C@H](C)NC(=O)[C@H](Cc1ccc(O)cc1)NC(=O)[C@H](Cc1c[nH]c2ccccc12)NC(=O)[C@@H](NC(=O)[C@@H](NC(=O)[C@H](CO)NC(=O)[C@H](CCCNC(=N)N)NC(=O)[C@H](CCC(N)=O)NC(=O)C1CCCN1C(=O)[C@H](CC(N)=O)NC(=O)[C@H](CCSC)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCCCN)NC(=O)[C@@H](NC(=O)[C@H](Cc1cnc[nH]1)NC(=O)CNC(=O)[C@H](Cc1ccccc1)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CC(=O)O)NC(=O)[C@H](CS)NC(=O)[C@H](C)NC(=O)[C@H](Cc1ccc(O)cc1)NC(=O)[C@H](Cc1c[nH]c2ccccc12)NC(=O)[C@@H](NC(=O)[C@@H](NC(=O)[C@H](CO)NC(=O)[C@H](CCCNC(=N)N)NC(=O)[C@H](CCC(N)=O)NC(=O)C1CCCN1C(=O)[C@H](CC(N)=O)NC(=O)[C@H](CCSC)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCCCN)NC(=O)[C@@H](NC(=O)[C@H](Cc1cnc[nH]1)NC(=O)CNC(=O)[C@H](Cc1ccccc1)NC(=O)[C@H](CCC(=O)O)NC(=O)[C@H](CC(=O)O)NC(=O)[C@H](CS)NC(=O)[C@H](C)N)C(C)CC)C(C)O)C(C)C)C(C)CC)C(C)O)C(C)C)C(=O)N[C@@H](CCCCN)C(=O)N[C@@H](CC(C)C)C(=O)O,true,50,18,14,8,6,13,7,stress,50-residue repeating alphabet
+arg_lys_rk,RK,true,N=C(N)NCCC[C@H](N)C(=O)N[C@@H](CCCCN)C(=O)O,true,2,0,2,2,0,0,0,charged,arg-lys
+asp_arg_dr,DR,true,N=C(N)NCCC[C@H](NC(=O)[C@@H](N)CC(=O)O)C(=O)O,true,2,0,2,1,1,0,0,"charged,asp_glu",asp-arg
+glu_arg_er,ER,true,N=C(N)NCCC[C@H](NC(=O)[C@@H](N)CCC(=O)O)C(=O)O,true,2,0,2,1,1,0,0,"charged,asp_glu",glu-arg
+asn_asp_nd,ND,true,NC(=O)C[C@H](N)C(=O)N[C@@H](CC(=O)O)C(=O)O,true,2,0,1,0,1,1,0,"polar,asp_glu",asn-asp
+gln_glu_qe,QE,true,NC(=O)CC[C@H](N)C(=O)N[C@@H](CCC(=O)O)C(=O)O,true,2,0,1,0,1,1,0,"polar,asp_glu",gln-glu

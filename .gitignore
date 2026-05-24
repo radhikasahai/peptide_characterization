@@ -13,3 +13,4 @@ build/
 
 # Streamlit / local outputs
 .streamlit/
+output/
