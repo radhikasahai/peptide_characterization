@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 import io
+import sys
+from pathlib import Path
 from typing import Any, Dict
+
+# Repo root on sys.path (Streamlit runs this file from app/, not project root).
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 import streamlit as st
 from rdkit.Chem.Draw import MolToImage

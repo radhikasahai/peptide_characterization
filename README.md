@@ -122,7 +122,11 @@ python peptide_visual.py
 
 ## Web UI (Streamlit)
 
+Run from the **repository root** (so imports resolve):
+
 ```bash
+cd peptide_characterization
+conda activate peptide
 streamlit run app/streamlit_app.py
 ```
 
