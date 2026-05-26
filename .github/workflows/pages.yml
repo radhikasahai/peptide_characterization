@@ -23,6 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure production API URL
+        env:
+          API_URL: ${{ vars.PEPTIDE_API_URL }}
+        run: |
+          if [ -n "$API_URL" ]; then
+            sed -i "s|__PEPTIDE_API_URL__|${API_URL}|g" docs/js/config.js
+          else
+            echo "::warning::Set repo variable PEPTIDE_API_URL (Settings → Secrets and variables → Actions → Variables) to your Render API URL."
+          fi
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

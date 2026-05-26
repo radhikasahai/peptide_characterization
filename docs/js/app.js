@@ -4,6 +4,15 @@
   var API = window.PEPTIDE_API_URL;
   var debounceTimer = null;
 
+  if (!API || API.indexOf("__PEPTIDE_API_URL__") !== -1) {
+    document.addEventListener("DOMContentLoaded", function () {
+      showStatus(
+        "API not configured. Deploy the backend on Render, set the PEPTIDE_API_URL repository variable, and re-run the Pages deploy workflow.",
+        "error"
+      );
+    });
+  }
+
   var els = {
     intro: document.getElementById("intro"),
     status: document.getElementById("status"),
@@ -36,18 +45,35 @@
   }
 
   function apiFetch(path, options) {
-    return fetch(API + path, options).then(function (response) {
-      return response.json().then(function (data) {
-        if (!response.ok) {
-          var msg =
-            (data.detail && (data.detail.message || JSON.stringify(data.detail))) ||
-            data.message ||
-            "Request failed";
-          throw new Error(msg);
+    if (!API || API.indexOf("__PEPTIDE_API_URL__") !== -1) {
+      return Promise.reject(
+        new Error("API URL not configured. See README → Web UI → Deploy.")
+      );
+    }
+    return fetch(API + path, options)
+      .then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok) {
+            var msg =
+              (data.detail &&
+                (data.detail.message || JSON.stringify(data.detail))) ||
+              data.message ||
+              "Request failed";
+            throw new Error(msg);
+          }
+          return data;
+        });
+      })
+      .catch(function (err) {
+        if (err instanceof TypeError) {
+          throw new Error(
+            "Cannot reach API at " +
+              API +
+              ". Deploy the backend on Render and set PEPTIDE_API_URL."
+          );
         }
-        return data;
+        throw err;
       });
-    });
   }
 
   function selectedGenMode() {

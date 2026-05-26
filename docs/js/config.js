@@ -1,5 +1,5 @@
-// Set PEPTIDE_API_URL to your deployed API (e.g. Render) before using GitHub Pages.
-// Local dev defaults to http://localhost:8000 when opened via file:// or localhost.
+// Production API URL is injected by .github/workflows/pages.yml from the
+// PEPTIDE_API_URL repository variable. Local dev uses localhost:8000.
 (function () {
   if (window.PEPTIDE_API_URL) return;
 
@@ -9,6 +9,5 @@
     return;
   }
 
-  // Replace with your Render/Railway/Fly API URL after deploying api/
-  window.PEPTIDE_API_URL = "https://peptide-characterization-api.onrender.com";
+  window.PEPTIDE_API_URL = "__PEPTIDE_API_URL__";
 })();

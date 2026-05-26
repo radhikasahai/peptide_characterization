@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Peptide characterization</title>
+    <script>
+      (function () {
+        if (window.location.hostname.endsWith("github.io")) {
+          var parts = window.location.pathname.split("/").filter(Boolean);
+          if (parts[0] === "peptide_characterization") {
+            var base = document.createElement("base");
+            base.href = "/peptide_characterization/";
+            document.head.appendChild(base);
+          }
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>

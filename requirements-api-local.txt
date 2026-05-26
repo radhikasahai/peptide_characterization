@@ -1,0 +1,5 @@
+# Local API dev only — use conda RDKit from environment.yml (do not install rdkit-pypi).
+fastapi>=0.100
+uvicorn[standard]>=0.23
+httpx>=0.24
+python-multipart>=0.0.6

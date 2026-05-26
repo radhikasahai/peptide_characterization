@@ -122,7 +122,9 @@ python peptide_visual.py
 
 ## Web UI
 
-The interactive web app uses a **GitHub Pages frontend** (`docs/`) and a **FastAPI backend** (`api/`) that reuses the same Python modules as the CLI.
+Interactive app: **GitHub Pages frontend** (`docs/`) + **FastAPI backend** (`api/`).
+
+Live site: **https://radhikasahai.github.io/peptide_characterization/**
 
 ### Local development
 
@@ -130,31 +132,47 @@ Terminal 1 — API (from repo root):
 
 ```bash
 conda activate peptide
-pip install -r requirements-api.txt   # if fastapi/uvicorn not yet installed
+pip install -r requirements-api-local.txt
 uvicorn api.main:app --reload --port 8000
 ```
 
-Terminal 2 — static frontend (any static server in `docs/`):
+Do **not** run `pip install -r requirements-api.txt` locally if you already have conda RDKit — it installs a conflicting `rdkit-pypi` copy.
+
+Terminal 2 — frontend:
 
 ```bash
 cd docs
 python -m http.server 5500
 ```
 
-Open **http://localhost:5500**. The frontend defaults to `http://localhost:8000` for API calls.
+Open **http://localhost:5500**.
 
-### Deploy
+### Deploy to GitHub Pages + Render
 
-**Frontend (GitHub Pages)**
+**Step 1 — Enable Pages (one-time)**
 
-1. Repo → **Settings** → **Pages** → Source: **GitHub Actions** (workflow `.github/workflows/pages.yml` deploys `docs/` on push to `main`).
-2. Site URL: `https://<user>.github.io/peptide_characterization/`
+1. Repo → **Settings** → **Pages**
+2. **Build and deployment → Source:** **GitHub Actions**
 
-**Backend (Render example)**
+**Step 2 — Deploy the API on Render**
 
-1. Connect this repo on [Render](https://render.com) and use `render.yaml`, or deploy the `Dockerfile` manually.
-2. Set `ALLOWED_ORIGINS` to your GitHub Pages URL (e.g. `https://radhikasahai.github.io`).
-3. Copy the live API URL into `docs/js/config.js` (`PEPTIDE_API_URL`) and push so the Pages site can reach the API.
+1. [Render](https://render.com) → **New** → **Blueprint** (or Web Service from this repo)
+2. Use the repo `render.yaml` / `Dockerfile`
+3. Confirm env var `ALLOWED_ORIGINS=https://radhikasahai.github.io`
+4. Wait for deploy; copy the service URL (e.g. `https://peptide-characterization-api.onrender.com`)
+
+**Step 3 — Wire the frontend to the API**
+
+1. Repo → **Settings** → **Secrets and variables** → **Actions** → **Variables**
+2. Add **`PEPTIDE_API_URL`** = your Render API URL (no trailing slash)
+3. Push to `main` or re-run **Deploy GitHub Pages** workflow
+
+**Step 4 — Verify**
+
+- Pages site shows the dark interactive UI (not README)
+- Enter `GG` → 2D structure and descriptors appear
+
+**Fallback (if Actions deploy fails):** Settings → Pages → deploy from branch **`main`** / folder **`/docs`**.
 
 ### Streamlit (legacy demo)
 
