@@ -4,18 +4,12 @@
   var API = window.PEPTIDE_API_URL;
   var debounceTimer = null;
 
-  if (!API || API.indexOf("__PEPTIDE_API_URL__") !== -1) {
-    document.addEventListener("DOMContentLoaded", function () {
-      showStatus(
-        "API not configured. Deploy the backend on Render, set the PEPTIDE_API_URL repository variable, and re-run the Pages deploy workflow.",
-        "error"
-      );
-    });
-  }
-
   var els = {
     intro: document.getElementById("intro"),
     status: document.getElementById("status"),
+    apiConfig: document.getElementById("api-config"),
+    apiUrlInput: document.getElementById("api-url-input"),
+    apiSaveBtn: document.getElementById("api-save-btn"),
     benchmarkSelect: document.getElementById("benchmark-select"),
     sequenceInput: document.getElementById("sequence-input"),
     hydrolyze: document.getElementById("hydrolyze"),
@@ -32,7 +26,15 @@
     apiUrl: document.getElementById("api-url"),
   };
 
-  els.apiUrl.textContent = API;
+  function apiIsConfigured() {
+    return API && API.indexOf("__PEPTIDE_API_URL__") === -1;
+  }
+
+  function refreshApiDisplay() {
+    els.apiUrl.textContent = apiIsConfigured() ? API : "(not set)";
+  }
+
+  refreshApiDisplay();
 
   function showStatus(message, type) {
     els.status.textContent = message;
@@ -44,10 +46,35 @@
     els.status.classList.add("hidden");
   }
 
+  function showApiConfig() {
+    els.apiConfig.classList.remove("hidden");
+    if (apiIsConfigured()) {
+      els.apiUrlInput.value = API;
+    }
+  }
+
+  function setApiUrl(url) {
+    API = url.replace(/\/$/, "");
+    window.PEPTIDE_API_URL = API;
+    try {
+      localStorage.setItem("PEPTIDE_API_URL", API);
+    } catch (e) {}
+    refreshApiDisplay();
+    els.apiConfig.classList.add("hidden");
+  }
+
+  function testApiConnection() {
+    return apiFetch("/health").then(function (data) {
+      if (data.status !== "ok") {
+        throw new Error("API health check failed");
+      }
+    });
+  }
+
   function apiFetch(path, options) {
-    if (!API || API.indexOf("__PEPTIDE_API_URL__") !== -1) {
+    if (!apiIsConfigured()) {
       return Promise.reject(
-        new Error("API URL not configured. See README → Web UI → Deploy.")
+        new Error("Set your Render API URL in the Connect API panel above.")
       );
     }
     return fetch(API + path, options)
@@ -237,6 +264,30 @@
       });
   }
 
+  els.apiSaveBtn.addEventListener("click", function () {
+    var url = els.apiUrlInput.value.trim();
+    if (!url) {
+      showStatus("Enter your Render API URL.", "error");
+      return;
+    }
+    if (!/^https?:\/\//.test(url)) {
+      showStatus("URL must start with http:// or https://", "error");
+      return;
+    }
+    showStatus("Connecting to API…", "loading");
+    setApiUrl(url);
+    testApiConnection()
+      .then(function () {
+        hideStatus();
+        loadBenchmark();
+        characterize();
+      })
+      .catch(function (err) {
+        showApiConfig();
+        showStatus("Could not reach API: " + err.message, "error");
+      });
+  });
+
   els.benchmarkSelect.addEventListener("change", function () {
     if (els.benchmarkSelect.value) {
       els.sequenceInput.value = els.benchmarkSelect.value;
@@ -253,6 +304,14 @@
   });
 
   updateGenPanels();
-  loadBenchmark();
-  characterize();
+  if (apiIsConfigured()) {
+    loadBenchmark();
+    characterize();
+  } else {
+    showApiConfig();
+    showStatus(
+      "Deploy the API on Render (see README), then paste your API URL above.",
+      "error"
+    );
+  }
 })();

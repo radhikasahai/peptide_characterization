@@ -275,3 +275,20 @@ footer a {
 .hidden {
   display: none !important;
 }
+
+.api-config h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.api-config .caption a {
+  color: var(--accent);
+}
+
+.api-config button {
+  margin-top: 0.25rem;
+}

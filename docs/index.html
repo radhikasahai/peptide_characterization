@@ -29,6 +29,23 @@
     </header>
 
     <main>
+      <section id="api-config" class="panel api-config hidden">
+        <h2>Connect API backend</h2>
+        <p class="caption">
+          GitHub Pages serves the UI only. Paste your Render API URL below
+          (from <a href="https://dashboard.render.com" target="_blank" rel="noopener">Render dashboard</a>
+          after deploying this repo&apos;s Dockerfile).
+        </p>
+        <label for="api-url-input">API URL</label>
+        <input
+          id="api-url-input"
+          type="url"
+          placeholder="https://peptide-characterization-api.onrender.com"
+          autocomplete="off"
+        />
+        <button type="button" id="api-save-btn">Save &amp; connect</button>
+      </section>
+
       <div id="status" class="status hidden" role="status"></div>
 
       <section class="panel">

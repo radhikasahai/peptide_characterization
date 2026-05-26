@@ -161,11 +161,12 @@ Open **http://localhost:5500**.
 3. Confirm env var `ALLOWED_ORIGINS=https://radhikasahai.github.io`
 4. Wait for deploy; copy the service URL (e.g. `https://peptide-characterization-api.onrender.com`)
 
-**Step 3 — Wire the frontend to the API**
+**Step 3 — Connect frontend to API**
 
-1. Repo → **Settings** → **Secrets and variables** → **Actions** → **Variables**
-2. Add **`PEPTIDE_API_URL`** = your Render API URL (no trailing slash)
-3. Push to `main` or re-run **Deploy GitHub Pages** workflow
+Either:
+
+- **Quick (no redeploy):** open the live site → **Connect API backend** panel → paste your Render URL → **Save & connect**
+- **Permanent:** repo → **Settings → Secrets and variables → Actions → Variables** → add **`PEPTIDE_API_URL`** → re-run **Deploy GitHub Pages**
 
 **Step 4 — Verify**
 
