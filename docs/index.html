@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Peptide characterization</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Peptide characterization</h1>
+      <p id="intro">
+        Built with RDKit: validation and composition from sequence, linear peptide
+        assembly via amide coupling, optional Asp/Glu side-chain methyl protection
+        during assembly.
+      </p>
+    </header>
+
+    <main>
+      <div id="status" class="status hidden" role="status"></div>
+
+      <section class="panel">
+        <label for="benchmark-select">Load benchmark example</label>
+        <select id="benchmark-select">
+          <option value="">— custom —</option>
+        </select>
+
+        <label for="sequence-input">One-letter amino acid sequence</label>
+        <input
+          id="sequence-input"
+          type="text"
+          value="ACYDEKGP"
+          autocomplete="off"
+          spellcheck="false"
+        />
+
+        <div class="checkbox-row">
+          <input id="hydrolyze" type="checkbox" checked />
+          <label for="hydrolyze">
+            Hydrolyze Asp/Glu side-chain methyl esters after assembly
+          </label>
+        </div>
+      </section>
+
+      <details id="generate-panel">
+        <summary>Generate synthetic sequence (Phase 1)</summary>
+        <div class="gen-mode" id="gen-mode">
+          <label><input type="radio" name="gen-mode" value="random" checked /> Random</label>
+          <label><input type="radio" name="gen-mode" value="motif" /> Motif repeat</label>
+          <label><input type="radio" name="gen-mode" value="combinatorial" /> Combinatorial</label>
+        </div>
+
+        <div id="gen-random" class="gen-grid">
+          <div>
+            <label for="gen-length">Length</label>
+            <input id="gen-length" type="number" min="1" max="100" value="8" />
+          </div>
+        </div>
+
+        <div id="gen-motif" class="gen-grid hidden">
+          <div>
+            <label for="gen-motif-text">Motif</label>
+            <input id="gen-motif-text" type="text" value="RGD" />
+          </div>
+          <div>
+            <label for="gen-repeats">Repeats</label>
+            <input id="gen-repeats" type="number" min="1" max="20" value="2" />
+          </div>
+          <div>
+            <label for="gen-flank">N-term flank</label>
+            <input id="gen-flank" type="text" value="A" />
+          </div>
+        </div>
+
+        <div id="gen-combinatorial" class="gen-grid hidden">
+          <div>
+            <label for="gen-base">Base sequence</label>
+            <input id="gen-base" type="text" value="AAAAA" />
+          </div>
+          <div>
+            <label for="gen-position">Vary position (1-based)</label>
+            <input id="gen-position" type="number" min="1" max="50" value="3" />
+          </div>
+          <div>
+            <label for="gen-allowed">Allowed AAs at position</label>
+            <input id="gen-allowed" type="text" value="DE" />
+          </div>
+        </div>
+
+        <button type="button" id="generate-btn">Generate and use sequence</button>
+        <p id="library-caption" class="caption hidden"></p>
+        <pre id="library-summary" class="json-block hidden"></pre>
+      </details>
+
+      <div class="columns">
+        <section class="panel">
+          <h2>Composition</h2>
+          <pre id="composition" class="json-block">Enter a valid sequence to see composition.</pre>
+        </section>
+
+        <section class="panel">
+          <h2>Structure</h2>
+          <div id="smiles" class="smiles">—</div>
+          <img id="structure-img" class="structure-img hidden" alt="2D peptide structure" />
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2>Whole-molecule descriptors</h2>
+        <table id="descriptors-table">
+          <thead>
+            <tr>
+              <th>Descriptor</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody id="descriptors-body">
+            <tr>
+              <td colspan="2" style="color: var(--muted)">No data yet</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <footer>
+      API: <span id="api-url"></span> ·
+      <a href="https://github.com/radhikasahai/peptide_characterization">Source on GitHub</a>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

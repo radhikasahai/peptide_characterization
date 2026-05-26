@@ -120,7 +120,43 @@ python peptide_parser.py
 python peptide_visual.py
 ```
 
-## Web UI (Streamlit)
+## Web UI
+
+The interactive web app uses a **GitHub Pages frontend** (`docs/`) and a **FastAPI backend** (`api/`) that reuses the same Python modules as the CLI.
+
+### Local development
+
+Terminal 1 — API (from repo root):
+
+```bash
+conda activate peptide
+pip install -r requirements-api.txt   # if fastapi/uvicorn not yet installed
+uvicorn api.main:app --reload --port 8000
+```
+
+Terminal 2 — static frontend (any static server in `docs/`):
+
+```bash
+cd docs
+python -m http.server 5500
+```
+
+Open **http://localhost:5500**. The frontend defaults to `http://localhost:8000` for API calls.
+
+### Deploy
+
+**Frontend (GitHub Pages)**
+
+1. Repo → **Settings** → **Pages** → Source: **GitHub Actions** (workflow `.github/workflows/pages.yml` deploys `docs/` on push to `main`).
+2. Site URL: `https://<user>.github.io/peptide_characterization/`
+
+**Backend (Render example)**
+
+1. Connect this repo on [Render](https://render.com) and use `render.yaml`, or deploy the `Dockerfile` manually.
+2. Set `ALLOWED_ORIGINS` to your GitHub Pages URL (e.g. `https://radhikasahai.github.io`).
+3. Copy the live API URL into `docs/js/config.js` (`PEPTIDE_API_URL`) and push so the Pages site can reach the API.
+
+### Streamlit (legacy demo)
 
 Run from the **repository root** (so imports resolve):
 
@@ -157,7 +193,9 @@ GitHub Actions runs the same tests using Micromamba (`.github/workflows/ci.yml`)
 | `peptide_parser.py` | Sequence validation, composition, **RDKit peptide assembly** |
 | `peptide_synthesis.py` | **Generate** sequences (random/motif/library) and **build** structures |
 | `peptide_visual.py` | Descriptors, fingerprints, 2D/3D export helpers |
-| `app/streamlit_app.py` | Browser UI combining parser + visualization |
+| `api/main.py` | FastAPI backend for the GitHub Pages web UI |
+| `docs/` | Static frontend (GitHub Pages) |
+| `app/streamlit_app.py` | Legacy Streamlit demo UI |
 | `data/benchmark_sequences.csv` | Committed regression benchmark (golden SMILES + composition) |
 | `scripts/generate_benchmark.py` | Regenerate benchmark CSV from manifest |
 | `scripts/export_peptide_visuals.py` | Batch PNG/SDF export from peptide CSV |
