@@ -452,3 +452,86 @@ footer a {
 .api-config button {
   margin-top: 0.25rem;
 }
+
+.references-panel h2 {
+  margin-bottom: 0.5rem;
+}
+
+.ref-heading {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.ref-heading:first-of-type {
+  margin-top: 0.5rem;
+}
+
+.ref-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.ref-table {
+  width: 100%;
+  min-width: 520px;
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.ref-table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.ref-table td {
+  vertical-align: top;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.ref-table td:first-child {
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.ref-table td code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+.ref-table a {
+  color: var(--accent);
+}
+
+.ref-table em {
+  font-style: italic;
+}
+
+.ref-list {
+  margin: 0.35rem 0 0.75rem;
+  padding-left: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  max-width: 72ch;
+}
+
+.ref-list li {
+  margin-bottom: 0.35rem;
+}
+
+.references-panel .caption {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.references-panel .caption a {
+  color: var(--accent);
+}

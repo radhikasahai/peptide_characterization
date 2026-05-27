@@ -333,6 +333,242 @@
           </li>
         </ul>
       </details>
+
+      <section id="references" class="panel references-panel">
+        <h2>References</h2>
+        <p class="section-intro">
+          Published methods and software behind this codebase. Amino-acid monomer SMILES
+          and amide-coupling reaction SMARTS in
+          <code>peptide_parser.py</code> are <strong>project-defined</strong> building
+          blocks (regression-checked in
+          <code>data/benchmark_sequences.csv</code>); they implement standard peptide-bond
+          chemistry rather than reproducing a single published structure database.
+        </p>
+
+        <h3 class="ref-heading">Cheminformatics platform and notation</h3>
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th scope="col">Topic</th>
+                <th scope="col">Used in</th>
+                <th scope="col">Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>RDKit</td>
+                <td>Parser, API, visuals</td>
+                <td>
+                  Landrum, G. <em>RDKit: Open-Source Cheminformatics</em>;
+                  <a href="https://www.rdkit.org" target="_blank" rel="noopener"
+                    >rdkit.org</a
+                  >
+                  —
+                  <a
+                    href="https://www.rdkit.org/docs/Overview.html#citation-information"
+                    target="_blank"
+                    rel="noopener"
+                    >citation info</a
+                  >
+                  (e.g.
+                  <a href="https://doi.org/10.5281/zenodo.591637" target="_blank" rel="noopener"
+                    >10.5281/zenodo.591637</a
+                  >).
+                </td>
+              </tr>
+              <tr>
+                <td>SMILES</td>
+                <td>All SMILES I/O</td>
+                <td>
+                  Weininger, D. <em>J. Chem. Inf. Comput. Sci.</em>
+                  <strong>1988</strong>, <em>28</em>, 31–36; Weininger, D.; Weininger, A.;
+                  Weininger, J. L. <em>J. Chem. Inf. Comput. Sci.</em> <strong>1989</strong>,
+                  <em>29</em>, 97–101.
+                </td>
+              </tr>
+              <tr>
+                <td>SMARTS reactions</td>
+                <td>Amide coupling, hydrolysis</td>
+                <td>Daylight SMARTS; RDKit reaction machinery (see RDKit citation).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="ref-heading">In silico linear peptide assembly</h3>
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th scope="col">Topic</th>
+                <th scope="col">Used in</th>
+                <th scope="col">Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Peptide-bond (amide) formation</td>
+                <td>Sequence → mol build</td>
+                <td>
+                  Standard coupling concept; solid-phase foundation: Merrifield, R. B.
+                  <em>J. Am. Chem. Soc.</em> <strong>1963</strong>, <em>85</em>, 2149–2154.
+                </td>
+              </tr>
+              <tr>
+                <td>Asp/Glu methyl ester protection</td>
+                <td>Building blocks, hydrolyze option</td>
+                <td>
+                  Bodanszky, M. <em>Principles of Peptide Synthesis</em> (Springer); Fields,
+                  G. B.; Noble, R. L. <em>Int. J. Pept. Protein Res.</em>
+                  <strong>1990</strong>, <em>35</em>, 161–214.
+                </td>
+              </tr>
+              <tr>
+                <td>One-letter codes</td>
+                <td>Validation, composition</td>
+                <td>IUPAC-IUBMB symbols for the standard amino acids.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="ref-heading">Molecular descriptors (this app)</h3>
+        <div class="ref-table-wrap">
+          <table class="ref-table ref-table-two-col">
+            <thead>
+              <tr>
+                <th scope="col">Descriptor</th>
+                <th scope="col">Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>logp</code> (Crippen MolLogP)</td>
+                <td>
+                  Wildman, M. D.; Crippen, G. M. <em>J. Chem. Inf. Comput. Sci.</em>
+                  <strong>1999</strong>, <em>39</em>, 868–873.
+                </td>
+              </tr>
+              <tr>
+                <td><code>tpsa</code></td>
+                <td>
+                  Ertl, P.; Rohde, B.; Selzer, P. <em>J. Med. Chem.</em>
+                  <strong>2000</strong>, <em>43</em>, 3714–3717.
+                </td>
+              </tr>
+              <tr>
+                <td><code>hbond_donors</code>, <code>hbond_acceptors</code>,
+                  <code>rotatable_bonds</code></td>
+                <td>
+                  Lipinski, C. A.; Lombardo, F.; Dominy, B. W.; Feeney, P. J.
+                  <em>Adv. Drug Delivery Rev.</em> <strong>1997</strong>, <em>23</em>, 3–25.
+                  Lipinski, C. A. <em>J. Pharmacol. Toxicol. Methods</em>
+                  <strong>2001</strong>, <em>44</em>, 235–249.
+                </td>
+              </tr>
+              <tr>
+                <td><code>fraction_csp3</code></td>
+                <td>
+                  Lovering, F.; Bikker, J.; Humblet, C. <em>J. Med. Chem.</em>
+                  <strong>2009</strong>, <em>52</em>, 6752–6756 (Fsp³; RDKit
+                  <code>CalcFractionCSP3</code>).
+                </td>
+              </tr>
+              <tr>
+                <td>Molecular weight, heavy atoms</td>
+                <td>Standard RDKit <code>Descriptors</code> (see RDKit citation).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="ref-heading">3D structures and similarity (CLI export)</h3>
+        <p class="field-hint">
+          Available via
+          <code>scripts/export_peptide_visuals.py</code>, not in the browser UI.
+        </p>
+        <div class="ref-table-wrap">
+          <table class="ref-table">
+            <thead>
+              <tr>
+                <th scope="col">Topic</th>
+                <th scope="col">Output / code</th>
+                <th scope="col">Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>3D embedding</td>
+                <td><code>EmbedMolecule</code></td>
+                <td>
+                  Riniker, S.; Landrum, G. A. <em>J. Chem. Inf. Model.</em>
+                  <strong>2015</strong>, <em>55</em>, 2562–2574 (ETKDG).
+                </td>
+              </tr>
+              <tr>
+                <td>UFF relaxation</td>
+                <td><code>{id}_3d.sdf</code></td>
+                <td>
+                  Rappe, A. K.; Casewit, C. J.; Colwell, K. S.; et al.
+                  <em>J. Am. Chem. Soc.</em> <strong>1992</strong>, <em>114</em>,
+                  10024–10035.
+                </td>
+              </tr>
+              <tr>
+                <td>MMFF relaxation</td>
+                <td><code>{id}_ligand.sdf</code></td>
+                <td>
+                  Halgren, T. A. <em>J. Comput. Chem.</em> <strong>1996</strong>,
+                  <em>17</em>, 490–519.
+                </td>
+              </tr>
+              <tr>
+                <td>Morgan fingerprint</td>
+                <td><code>GetMorganGenerator</code></td>
+                <td>
+                  Rogers, D.; Hahn, M. <em>J. Chem. Inf. Model.</em>
+                  <strong>2010</strong>, <em>50</em>, 742–754.
+                </td>
+              </tr>
+              <tr>
+                <td>MACCS keys</td>
+                <td><code>GenMACCSKeys</code></td>
+                <td>
+                  Durant, J. L.; Leland, B. A.; Henry, D. R.; Hounshell, J. D.
+                  <em>J. Chem. Inf. Comput. Sci.</em> <strong>2002</strong>, <em>42</em>,
+                  1273–1280.
+                </td>
+              </tr>
+              <tr>
+                <td>Tanimoto similarity</td>
+                <td>Fingerprint compare</td>
+                <td>
+                  Tanimoto, T. T. <em>IBM Technical Report Series</em>
+                  <strong>1957</strong>; applied to molecular fingerprints.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="ref-heading">Optional further reading</h3>
+        <ul class="ref-list">
+          <li>
+            <strong>RGD</strong> motif examples: Pierschbacher, M. D.; Ruoslahti, E.
+            <em>Nature</em> <strong>1984</strong>, <em>309</em>, 30–33.
+          </li>
+        </ul>
+        <p class="caption">
+          Full tables also in the
+          <a
+            href="https://github.com/radhikasahai/peptide_characterization#references"
+            target="_blank"
+            rel="noopener"
+            >README References section</a
+          >.
+        </p>
+      </section>
     </main>
 
     <footer>
@@ -341,7 +577,7 @@
       </p>
       <p>
         <a href="https://github.com/radhikasahai/peptide_characterization">Source on GitHub</a>
-        · Standard 20 L-AAs · linear peptides only
+        · <a href="#references">References</a> · Standard 20 L-AAs · linear peptides only
       </p>
     </footer>
 
