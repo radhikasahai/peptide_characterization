@@ -245,9 +245,7 @@ Published methods and software behind this codebase. Amino-acid monomer SMILES a
 | MACCS keys | `generate_maccs_fingerprint` | Durant, J. L.; Leland, B. A.; Henry, D. R.; Hounshell, J. D. *J. Chem. Inf. Comput. Sci.* **2002**, *42*, 1273–1280. |
 | Tanimoto similarity | `calculate_similarity` | Tanimoto, T. T. *IBM Technical Report Series* **1957** (similarity coefficient); widely applied to molecular fingerprints. |
 
-### Optional further reading (not required by the code)
 
-- Cell-adhesion **RGD** motif examples in docs/tests: Pierschbacher, M. D.; Ruoslahti, E. *Nature* **1984**, *309*, 30–33.
 
 ## Layout
 
