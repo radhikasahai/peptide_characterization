@@ -4,10 +4,21 @@
   var API = window.PEPTIDE_API_URL;
   var debounceTimer = null;
 
+  var GEN_MODE_HINTS = {
+    random:
+      "Builds a sequence of the given length using the standard 20 amino acids (uniform random).",
+    motif:
+      'Repeats a short motif with an optional N-terminal flank prepended once. Example: motif "RGD", repeats 2, flank "A" → ARGDRGD.',
+    combinatorial:
+      "Starts from a base sequence and swaps one position (1-based) through every amino acid in Allowed AAs at that position (up to 50 variants). The first variant is loaded into the sequence box.",
+  };
+
   var els = {
-    intro: document.getElementById("intro"),
+    introBenchmark: document.getElementById("intro-benchmark"),
     status: document.getElementById("status"),
     apiConfig: document.getElementById("api-config"),
+    apiChangeLink: document.getElementById("api-change-link"),
+    apiChangeBtn: document.getElementById("api-change-btn"),
     apiUrlInput: document.getElementById("api-url-input"),
     apiSaveBtn: document.getElementById("api-save-btn"),
     benchmarkSelect: document.getElementById("benchmark-select"),
@@ -17,9 +28,12 @@
     genRandom: document.getElementById("gen-random"),
     genMotif: document.getElementById("gen-motif"),
     genCombinatorial: document.getElementById("gen-combinatorial"),
+    genModeHint: document.getElementById("gen-mode-hint"),
     libraryCaption: document.getElementById("library-caption"),
+    libraryCaptionHint: document.getElementById("library-caption-hint"),
     librarySummary: document.getElementById("library-summary"),
     composition: document.getElementById("composition"),
+    compositionSummary: document.getElementById("composition-summary"),
     smiles: document.getElementById("smiles"),
     structureImg: document.getElementById("structure-img"),
     descriptorsBody: document.getElementById("descriptors-body"),
@@ -32,9 +46,32 @@
 
   function refreshApiDisplay() {
     els.apiUrl.textContent = apiIsConfigured() ? API : "(not set)";
+    if (apiIsConfigured()) {
+      els.apiChangeLink.classList.remove("hidden");
+    } else {
+      els.apiChangeLink.classList.add("hidden");
+    }
   }
 
   refreshApiDisplay();
+
+  function formatApiError(data) {
+    var detail = data && data.detail;
+    if (!detail) {
+      return data && data.message ? data.message : "Request failed";
+    }
+    if (typeof detail === "string") {
+      return detail;
+    }
+    var msg = detail.message || "Request failed";
+    if (detail.invalid_residues && detail.invalid_residues.length) {
+      msg += " Unsupported letters: " + detail.invalid_residues.join(", ") + ".";
+    }
+    if (detail.errors && detail.errors.length) {
+      msg += " " + detail.errors.join("; ");
+    }
+    return msg;
+  }
 
   function showStatus(message, type) {
     els.status.textContent = message;
@@ -53,6 +90,10 @@
     }
   }
 
+  function hideApiConfig() {
+    els.apiConfig.classList.add("hidden");
+  }
+
   function setApiUrl(url) {
     API = url.replace(/\/$/, "");
     window.PEPTIDE_API_URL = API;
@@ -60,7 +101,7 @@
       localStorage.setItem("PEPTIDE_API_URL", API);
     } catch (e) {}
     refreshApiDisplay();
-    els.apiConfig.classList.add("hidden");
+    hideApiConfig();
   }
 
   function testApiConnection() {
@@ -81,12 +122,7 @@
       .then(function (response) {
         return response.json().then(function (data) {
           if (!response.ok) {
-            var msg =
-              (data.detail &&
-                (data.detail.message || JSON.stringify(data.detail))) ||
-              data.message ||
-              "Request failed";
-            throw new Error(msg);
+            throw new Error(formatApiError(data));
           }
           return data;
         });
@@ -96,7 +132,7 @@
           throw new Error(
             "Cannot reach API at " +
               API +
-              ". Deploy the backend on Render and set PEPTIDE_API_URL."
+              ". The service may be waking up—wait ~30s and retry, or check your Render URL."
           );
         }
         throw err;
@@ -113,29 +149,70 @@
     els.genRandom.classList.toggle("hidden", mode !== "random");
     els.genMotif.classList.toggle("hidden", mode !== "motif");
     els.genCombinatorial.classList.toggle("hidden", mode !== "combinatorial");
+    if (els.genModeHint) {
+      els.genModeHint.textContent = GEN_MODE_HINTS[mode] || "";
+    }
+  }
+
+  function renderCompositionSummary(composition) {
+    if (!composition || !els.compositionSummary) {
+      return;
+    }
+    var parts = [
+      "Length " + composition.length,
+      composition.hydrophobic + " hydrophobic",
+      composition.charged + " charged (" +
+        composition.positive +
+        "+, " +
+        composition.negative +
+        "−)",
+      composition.polar + " polar",
+      composition.aromatic + " aromatic",
+    ];
+    els.compositionSummary.textContent = parts.join(" · ");
+    els.compositionSummary.classList.remove("hidden");
   }
 
   function renderComposition(composition) {
+    renderCompositionSummary(composition);
     els.composition.textContent = JSON.stringify(composition, null, 2);
+  }
+
+  function clearComposition() {
+    if (els.compositionSummary) {
+      els.compositionSummary.classList.add("hidden");
+      els.compositionSummary.textContent = "";
+    }
   }
 
   function renderDescriptors(descriptors) {
     els.descriptorsBody.innerHTML = "";
     if (!descriptors) {
-      els.descriptorsBody.innerHTML =
-        '<tr><td colspan="2" style="color: var(--muted)">Descriptor calculation failed</td></tr>';
+      var failRow = document.createElement("tr");
+      var failCell = document.createElement("td");
+      failCell.colSpan = 2;
+      failCell.className = "empty-cell";
+      failCell.textContent = "Descriptor calculation failed";
+      failRow.appendChild(failCell);
+      els.descriptorsBody.appendChild(failRow);
       return;
     }
     Object.keys(descriptors)
       .sort()
       .forEach(function (key) {
         var row = document.createElement("tr");
+        var keyCell = document.createElement("td");
+        var valCell = document.createElement("td");
+        keyCell.textContent = key;
         var val = descriptors[key];
         if (typeof val === "number") {
-          val = Number.isInteger(val) ? val : val.toFixed(4);
+          val = Number.isInteger(val) ? String(val) : val.toFixed(4);
+        } else {
+          val = val == null ? "" : String(val);
         }
-        row.innerHTML =
-          "<td>" + key + "</td><td>" + val + "</td>";
+        valCell.textContent = val;
+        row.appendChild(keyCell);
+        row.appendChild(valCell);
         els.descriptorsBody.appendChild(row);
       });
   }
@@ -156,6 +233,7 @@
   function characterize() {
     var sequence = els.sequenceInput.value.trim();
     if (!sequence) {
+      clearComposition();
       showStatus("Enter a sequence.", "error");
       return;
     }
@@ -172,6 +250,7 @@
     })
       .then(renderResult)
       .catch(function (err) {
+        clearComposition();
         showStatus(err.message, "error");
       });
   }
@@ -185,14 +264,15 @@
     apiFetch("/api/benchmark")
       .then(function (data) {
         var summary = data.summary;
-        els.intro.textContent =
-          "Built with RDKit: validation and composition from sequence, linear peptide " +
-          "assembly via amide coupling, optional Asp/Glu side-chain methyl protection " +
-          "during assembly. Regression benchmark: " +
-          summary.valid +
-          " valid and " +
-          summary.invalid +
-          " invalid sequences.";
+        if (els.introBenchmark) {
+          els.introBenchmark.textContent =
+            "Regression benchmark loaded: " +
+            summary.valid +
+            " valid and " +
+            summary.invalid +
+            " invalid sequences in data/benchmark_sequences.csv.";
+          els.introBenchmark.classList.remove("hidden");
+        }
 
         data.examples.forEach(function (ex) {
           var opt = document.createElement("option");
@@ -243,8 +323,10 @@
           els.libraryCaption.textContent =
             "Library: " + data.variants.length + " sequences (first loaded in input).";
           els.libraryCaption.classList.remove("hidden");
+          els.libraryCaptionHint.classList.remove("hidden");
         } else {
           els.libraryCaption.classList.add("hidden");
+          els.libraryCaptionHint.classList.add("hidden");
         }
 
         if (data.library_summary) {
@@ -288,6 +370,13 @@
       });
   });
 
+  if (els.apiChangeBtn) {
+    els.apiChangeBtn.addEventListener("click", function () {
+      showApiConfig();
+      els.apiUrlInput.focus();
+    });
+  }
+
   els.benchmarkSelect.addEventListener("change", function () {
     if (els.benchmarkSelect.value) {
       els.sequenceInput.value = els.benchmarkSelect.value;
@@ -305,6 +394,7 @@
 
   updateGenPanels();
   if (apiIsConfigured()) {
+    hideApiConfig();
     loadBenchmark();
     characterize();
   } else {

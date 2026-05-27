@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Validate peptide sequences, build linear structures with RDKit, and view composition and molecular descriptors."
+    />
     <title>Peptide characterization</title>
     <script>
       (function () {
@@ -21,20 +25,51 @@
   <body>
     <header>
       <h1>Peptide characterization</h1>
-      <p id="intro">
-        Built with RDKit: validation and composition from sequence, linear peptide
-        assembly via amide coupling, optional Asp/Glu side-chain methyl protection
-        during assembly.
-      </p>
+      <section class="how-it-works" aria-labelledby="how-heading">
+        <h2 id="how-heading" class="how-heading">How it works</h2>
+        <p class="section-intro">
+          Enter a <strong>one-letter amino acid sequence</strong> (standard 20 L-amino
+          acids). The app validates the sequence, summarizes composition, builds a
+          <strong>linear peptide</strong> in RDKit via <strong>amide coupling</strong>,
+          and reports <strong>SMILES</strong>, a <strong>2D structure</strong>, and
+          <strong>molecular descriptors</strong>.
+        </p>
+        <p class="limitations">
+          <strong>Supported:</strong> linear chains only.
+          <strong>Not supported:</strong> D-amino acids, unnatural residues, cyclization,
+          or post-translational modifications.
+        </p>
+        <p id="intro-benchmark" class="intro-benchmark hidden" aria-live="polite"></p>
+      </section>
     </header>
 
     <main>
       <section id="api-config" class="panel api-config hidden">
         <h2>Connect API backend</h2>
+        <p class="section-intro">
+          <strong>Why connect?</strong> GitHub Pages hosts this page as HTML, CSS, and
+          JavaScript only. Structure building and RDKit run on a separate
+          <strong>FastAPI server</strong> (for example on Render). Paste your deployed
+          API URL once; it is saved in this browser.
+        </p>
+        <p class="section-intro">
+          <strong>First request slow?</strong> Free hosting may wake up after idle
+          time—wait about 30 seconds and try again.
+        </p>
         <p class="caption">
-          GitHub Pages serves the UI only. Paste your Render API URL below
-          (from <a href="https://dashboard.render.com" target="_blank" rel="noopener">Render dashboard</a>
-          after deploying this repo&apos;s Dockerfile).
+          Deploy from this repo&apos;s <code>Dockerfile</code> / <code>render.yaml</code>,
+          then copy the service URL from the
+          <a href="https://dashboard.render.com" target="_blank" rel="noopener"
+            >Render dashboard</a
+          >. See the
+          <a
+            href="https://github.com/radhikasahai/peptide_characterization#deploy-to-github-pages--render"
+            target="_blank"
+            rel="noopener"
+            >README deploy section</a
+          >
+          for <code>ALLOWED_ORIGINS</code> and the <code>PEPTIDE_API_URL</code> GitHub
+          Actions variable (hides this panel when set).
         </p>
         <label for="api-url-input">API URL</label>
         <input
@@ -46,15 +81,37 @@
         <button type="button" id="api-save-btn">Save &amp; connect</button>
       </section>
 
-      <div id="status" class="status hidden" role="status"></div>
+      <p id="api-change-link" class="api-change-link hidden">
+        <button type="button" id="api-change-btn" class="link-button">
+          Change API URL
+        </button>
+      </p>
 
-      <section class="panel">
+      <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+
+      <section class="panel" aria-labelledby="sequence-heading">
+        <h2 id="sequence-heading">Sequence &amp; build options</h2>
+        <p class="section-intro">
+          Choose a benchmark example or type your own sequence. Results update
+          automatically after you stop typing (when the API is connected).
+        </p>
+
         <label for="benchmark-select">Load benchmark example</label>
+        <p class="field-hint">
+          Curated test sequences from the project benchmark
+          (<code>data/benchmark_sequences.csv</code>)—validation edge cases, Gly/Pro
+          coupling, and charged motifs. Select <strong>— custom —</strong> for your own
+          sequence.
+        </p>
         <select id="benchmark-select">
           <option value="">— custom —</option>
         </select>
 
         <label for="sequence-input">One-letter amino acid sequence</label>
+        <p class="field-hint">
+          Standard single-letter code (A, R, N, D, …). Spaces are ignored; letters are
+          uppercased. Unsupported characters (e.g. B, X, Z) are rejected before building.
+        </p>
         <input
           id="sequence-input"
           type="text"
@@ -69,15 +126,45 @@
             Hydrolyze Asp/Glu side-chain methyl esters after assembly
           </label>
         </div>
+        <details class="help">
+          <summary>Asp/Glu side-chain protection (why this checkbox matters)</summary>
+          <p>
+            During assembly, <strong>aspartic acid</strong> and
+            <strong>glutamic acid</strong> side chains are temporarily modeled as
+            <strong>methyl esters</strong> so coupling happens on the backbone, not the
+            side chain.
+          </p>
+          <p>
+            When this box is <strong>checked</strong> (default), those esters are removed
+            after assembly and the side chains are <strong>free carboxylic acids</strong>—the
+            usual representation for peptides in aqueous models.
+          </p>
+          <p>
+            <strong>Uncheck</strong> only if you want to inspect or export the
+            <strong>protected (methyl ester)</strong> form.
+          </p>
+        </details>
       </section>
 
-      <details id="generate-panel">
-        <summary>Generate synthetic sequence (Phase 1)</summary>
+      <details id="generate-panel" class="generate-panel">
+        <summary>Sequence generator</summary>
+        <p class="section-intro">
+          Create new one-letter sequences for exploration. Click
+          <strong>Generate and use sequence</strong> to fill the main input and run a
+          full characterization. Chemistry rules are unchanged—only the sequence string
+          changes.
+        </p>
+
         <div class="gen-mode" id="gen-mode">
           <label><input type="radio" name="gen-mode" value="random" checked /> Random</label>
           <label><input type="radio" name="gen-mode" value="motif" /> Motif repeat</label>
           <label><input type="radio" name="gen-mode" value="combinatorial" /> Combinatorial</label>
         </div>
+
+        <p id="gen-mode-hint" class="field-hint gen-mode-hint">
+          Builds a sequence of the given length using the standard 20 amino acids (uniform
+          random).
+        </p>
 
         <div id="gen-random" class="gen-grid">
           <div>
@@ -118,17 +205,56 @@
 
         <button type="button" id="generate-btn">Generate and use sequence</button>
         <p id="library-caption" class="caption hidden"></p>
+        <p id="library-caption-hint" class="field-hint hidden">
+          Combinatorial mode can return many sequences; the JSON block below summarizes
+          build success for a preview subset (not full descriptors for every variant).
+        </p>
         <pre id="library-summary" class="json-block hidden"></pre>
       </details>
 
       <div class="columns">
         <section class="panel">
           <h2>Composition</h2>
-          <pre id="composition" class="json-block">Enter a valid sequence to see composition.</pre>
+          <p class="section-intro">
+            Summary of the <strong>input sequence</strong> (amino-acid letters), not the
+            3D conformer. Counts use fixed property classes per residue (hydrophobic,
+            charged, polar, aromatic).
+          </p>
+          <details class="help">
+            <summary>What do these fields mean?</summary>
+            <dl class="glossary">
+              <dt>length</dt>
+              <dd>Number of residues after normalization.</dd>
+              <dt>hydrophobic</dt>
+              <dd>Count of residues classified hydrophobic (e.g. A, V, L, I).</dd>
+              <dt>charged</dt>
+              <dd>Residues with charged side chains in the neutral-pH model.</dd>
+              <dt>positive / negative</dt>
+              <dd>Subset of charged (e.g. K, R vs D, E).</dd>
+              <dt>polar</dt>
+              <dd>Uncharged polar side chains.</dd>
+              <dt>aromatic</dt>
+              <dd>F, W, Y.</dd>
+              <dt>counts</dt>
+              <dd>Per-letter occurrence dictionary.</dd>
+            </dl>
+          </details>
+          <p id="composition-summary" class="composition-summary hidden" aria-live="polite"></p>
+          <pre id="composition" class="json-block">Type a valid sequence above to see composition (JSON below).</pre>
         </section>
 
         <section class="panel">
           <h2>Structure</h2>
+          <p class="section-intro">
+            <strong>SMILES</strong> is the canonical linear structure after peptide
+            assembly. The <strong>2D image</strong> is an RDKit depiction of that molecule
+            (same graph used for descriptors).
+          </p>
+          <p class="field-hint">
+            Copy SMILES into other tools (Marvin, docking pipelines, etc.). This is the
+            assembled molecule, not a predicted bioactive conformation. 2D layout only—batch
+            3D export is available via the repo CLI.
+          </p>
           <div id="smiles" class="smiles">—</div>
           <img id="structure-img" class="structure-img hidden" alt="2D peptide structure" />
         </section>
@@ -136,6 +262,37 @@
 
       <section class="panel">
         <h2>Whole-molecule descriptors</h2>
+        <p class="section-intro">
+          Properties computed from the built SMILES with RDKit. Useful for quick
+          ADME-style screening; not a substitute for experimental measurement.
+        </p>
+        <details class="help">
+          <summary>Descriptor glossary</summary>
+          <dl class="glossary">
+            <dt>molecular_weight</dt>
+            <dd>Average molecular weight (Da).</dd>
+            <dt>exact_molecular_weight</dt>
+            <dd>Monoisotopic mass.</dd>
+            <dt>logp</dt>
+            <dd>Crippen logP (lipophilicity estimate).</dd>
+            <dt>tpsa</dt>
+            <dd>Topological polar surface area (Å²).</dd>
+            <dt>hbond_donors / hbond_acceptors</dt>
+            <dd>Lipinski H-bond donor and acceptor counts.</dd>
+            <dt>rotatable_bonds</dt>
+            <dd>Rotatable bonds (rough flexibility proxy).</dd>
+            <dt>ring_count</dt>
+            <dd>Number of rings in the molecular graph.</dd>
+            <dt>heavy_atom_count</dt>
+            <dd>Non-hydrogen atoms.</dd>
+            <dt>fraction_csp3</dt>
+            <dd>Fraction of sp³ carbons.</dd>
+            <dt>formal_charge</dt>
+            <dd>Net formal charge in the RDKit model.</dd>
+            <dt>num_atoms / num_bonds</dt>
+            <dd>Atoms and bonds in the graph.</dd>
+          </dl>
+        </details>
         <table id="descriptors-table">
           <thead>
             <tr>
@@ -145,16 +302,47 @@
           </thead>
           <tbody id="descriptors-body">
             <tr>
-              <td colspan="2" style="color: var(--muted)">No data yet</td>
+              <td colspan="2" class="empty-cell">
+                Connect the API and enter a valid sequence to see descriptors.
+              </td>
             </tr>
           </tbody>
         </table>
       </section>
+
+      <details class="help method-panel">
+        <summary>Method &amp; limitations (chemistry model)</summary>
+        <ul>
+          <li>Standard 20 L-amino acids only (validated alphabet).</li>
+          <li>
+            Linear peptides: iterative C-terminal carboxyl to incoming α-amine coupling
+            (RDKit reaction SMARTS; Gly and Pro handled as distinct cases).
+          </li>
+          <li>
+            Asp/Glu: side-chain methyl esters during assembly; hydrolyzed to acids by
+            default (see checkbox above).
+          </li>
+          <li>
+            Advanced batch export (CSV, 3D SDF, grids):
+            <a
+              href="https://github.com/radhikasahai/peptide_characterization#export-peptide-visuals-from-csv"
+              target="_blank"
+              rel="noopener"
+              >README — export peptide visuals</a
+            >.
+          </li>
+        </ul>
+      </details>
     </main>
 
     <footer>
-      API: <span id="api-url"></span> ·
-      <a href="https://github.com/radhikasahai/peptide_characterization">Source on GitHub</a>
+      <p>
+        <strong>API:</strong> <span id="api-url"></span> — backend running RDKit.
+      </p>
+      <p>
+        <a href="https://github.com/radhikasahai/peptide_characterization">Source on GitHub</a>
+        · Standard 20 L-AAs · linear peptides only
+      </p>
     </footer>
 
     <script src="js/config.js"></script>

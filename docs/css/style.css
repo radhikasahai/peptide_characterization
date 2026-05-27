@@ -40,10 +40,170 @@ header h1 {
 }
 
 header p {
-  margin: 0;
+  margin: 0 0 0.65rem;
   color: var(--muted);
   max-width: 72ch;
   font-size: 0.95rem;
+}
+
+header p:last-child {
+  margin-bottom: 0;
+}
+
+.how-it-works {
+  margin-top: 0.5rem;
+}
+
+.how-heading {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.limitations {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.65rem;
+  border-left: 3px solid var(--accent-dim);
+  background: rgba(61, 156, 245, 0.06);
+  border-radius: 0 6px 6px 0;
+}
+
+.intro-benchmark {
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.section-intro {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin: 0 0 0.85rem;
+  max-width: 72ch;
+  line-height: 1.55;
+}
+
+.section-intro strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: -0.35rem 0 0.5rem;
+  max-width: 72ch;
+  line-height: 1.45;
+}
+
+.field-hint code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+details.help {
+  margin-top: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+details.help summary {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+details.help p {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  max-width: 72ch;
+}
+
+details.help ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+details.help a {
+  color: var(--accent);
+}
+
+details.help.method-panel {
+  margin-bottom: 0;
+}
+
+dl.glossary {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+dl.glossary dt {
+  font-weight: 600;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  margin-top: 0.45rem;
+}
+
+dl.glossary dt:first-child {
+  margin-top: 0;
+}
+
+dl.glossary dd {
+  margin: 0.15rem 0 0;
+  padding-left: 0;
+}
+
+.composition-summary {
+  font-size: 0.85rem;
+  color: var(--text);
+  margin: 0 0 0.65rem;
+  padding: 0.5rem 0.65rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.generate-panel {
+  margin-bottom: 1rem;
+}
+
+.generate-panel .section-intro {
+  margin-top: 0.75rem;
+}
+
+.gen-mode-hint {
+  margin-top: 0.5rem;
+}
+
+.api-change-link {
+  text-align: right;
+  margin: -0.5rem 0 0.75rem;
+  font-size: 0.8rem;
+}
+
+.link-button {
+  background: transparent;
+  color: var(--accent);
+  padding: 0.25rem 0.5rem;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+.link-button:hover {
+  background: transparent;
+  color: var(--text);
+}
+
+.empty-cell {
+  color: var(--muted);
 }
 
 main {
