@@ -189,7 +189,7 @@ streamlit run app/streamlit_app.py
 
 `data/benchmark_sequences.csv` is a **frozen regression suite** (47 rows: 39 valid assemblies, 8 invalid inputs). Each valid row stores golden **canonical SMILES** and **composition counts** generated once by RDKit.
 
-Regenerate after changing assembly logic (review diffs before committing):
+Regenerate after changing assembly logic :
 
 ```bash
 python scripts/generate_benchmark.py
