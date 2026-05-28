@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peptide Characterization — Presentation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+      --text: #1a1a1a;
+      --muted: #555;
+      --light: #888;
+      --border: #e0e0e0;
+      --accent: #2563eb;
+      --bg: #fff;
+      --code-bg: #f6f7f9;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    /* ── slide container ── */
+    .deck {
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem 6vw;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .slide.active { display: flex; }
+
+    .slide.center { align-items: center; text-align: center; }
+
+    /* ── typography ── */
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-size: 2.6rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+      line-height: 1.25;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .subtitle {
+      font-size: 1.8rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .byline {
+      font-size: 1.3rem;
+      color: var(--light);
+      margin-top: 2rem;
+    }
+
+    p {
+      font-size: 1.4rem;
+      color: var(--muted);
+      max-width: 80ch;
+      margin-bottom: 1rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      position: relative;
+      padding-left: 1.8rem;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    ul li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.6em;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    ul li span.detail {
+      display: block;
+      font-size: 1.15rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: var(--code-bg);
+      padding: 0.2em 0.45em;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .tag {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── two-column layout ── */
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    /* ── pipeline flow diagram ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 1.25rem 0;
+    }
+
+    .flow-step {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1.3rem;
+      font-weight: 500;
+    }
+
+    .flow-arrow {
+      color: var(--light);
+      font-size: 1.5rem;
+    }
+
+    /* ── stat boxes ── */
+    .stats {
+      display: flex;
+      gap: 1.5rem;
+      margin: 1.25rem 0;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    /* ── architecture boxes ── */
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .arch-box {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem 1.75rem;
+    }
+
+    .arch-box h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .arch-box p {
+      font-size: 1.2rem;
+      margin-bottom: 0;
+    }
+
+    /* ── demo slide ── */
+    .demo-link {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 1rem 2.5rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .demo-link:hover { background: #1d4ed8; text-decoration: none; }
+
+    /* ── progress bar ── */
+    .progress {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+      z-index: 100;
+    }
+
+    /* ── slide counter ── */
+    .counter {
+      position: fixed;
+      bottom: 1rem;
+      right: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--light);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── nav hint (fades out) ── */
+    .nav-hint {
+      position: fixed;
+      bottom: 1rem;
+      left: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--light);
+      transition: opacity 1s;
+    }
+
+    /* ── references ── */
+    .ref-list {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.6;
+      max-height: 65vh;
+      overflow-y: auto;
+      padding-right: 1rem;
+    }
+
+    .ref-list li {
+      padding-left: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1.05rem;
+      color: var(--muted);
+    }
+
+    .ref-list li::before { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ─── 1. TITLE ─── -->
+  <section class="slide center">
+    <h1>Peptide Characterization</h1>
+    <p class="subtitle">A reproducible cheminformatics toolkit for linear peptide assembly and characterization</p>
+  </section>
+
+  <!-- ─── 2. INTRODUCTION ─── -->
+  <section class="slide">
+    <div class="tag">Introduction</div>
+    <h2>Radhika Sahai</h2>
+    <div class="columns">
+      <div>
+        <h3>Experience</h3>
+        <ul>
+          <li>ML Research (ATOM Consortium / UCSF &amp; LLNL)
+            <span class="detail">Kinase inhibitor prediction with uncertainty quantification; authoring manuscript on imbalanced bioactivity datasets</span>
+          </li>
+          <li>Peptide Characterization Tool
+            <span class="detail">End-to-end pipeline: sequences → SMILES → descriptors; full-stack web app</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h3>Skills</h3>
+        <ul>
+          <li>Cheminformatics — RDKit, SMILES, molecular descriptors</li>
+          <li>Machine Learning — PyTorch, Scikit-learn, uncertainty quantification, deep learning</li>
+          <li>Software — Python / FastAPI, full-stack web deployment</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 3. WHY THIS PROJECT ─── -->
+  <section class="slide">
+    <div class="tag">Why this Project?</div>
+    <h2>Sequence to structure</h2>
+    <ul>
+      <li>Peptide design often starts as a one-letter sequence, but downstream tools need structures (SMILES, 2D/3D, descriptors)</li>
+      <li>Goal: a small, reproducible pipeline, not a full SPPS lab informatics suite</li>
+      <li>Best for validation + build + quick ADME-style numbers in one place</li>
+    </ul>
+  </section>
+
+  <!-- ─── 3. PIPELINE OVERVIEW ─── -->
+  <section class="slide">
+    <div class="tag">Project Overview</div>
+    <h2>From sequence to actionable chemistry data</h2>
+    <div class="flow">
+      <span class="flow-step">One-letter sequence</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Validate</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Assemble (amide coupling)</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-step">Characterize</span>
+    </div>
+    <div class="columns" style="margin-top: 1.5rem;">
+      <div>
+        <h3>Input</h3>
+        <ul>
+          <li>One-letter amino acid sequence<span class="detail">e.g. <code>ACYDEKGP</code></span></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Output</h3>
+        <ul>
+          <li>Validation &amp; amino acid composition</li>
+          <li>Canonical SMILES + 2D structure (RDKit)</li>
+          <li>Molecular descriptors<span class="detail">MW, logP, TPSA, HBD/HBA, rotatable bonds, Fsp³</span></li>
+          <li>Library generation<span class="detail">Random, motif-repeat, combinatorial</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 4. LIVE DEMO ─── -->
+  <section class="slide">
+    <div class="tag">Demo</div>
+    <h2>Live demo</h2>
+    <div class="columns">
+      <div>
+        <h3>Walkthrough</h3>
+        <ul>
+          <li><code>GG</code> — quick warm-up, composition + structure + descriptors</li>
+          <li><code>ACYDEKGP</code> — rich example with charged / aromatic residues</li>
+          <li>Generator: motif <code>RGD</code> × 2, flank <code>A</code> → <code>ARGDRGD</code></li>
+          <li><code>DE</code> — hydrolysis ON vs OFF<span class="detail">Hydrolyze toggles structure, not just display</span></li>
+          <li><code>AX</code> — validation error for non-standard residue</li>
+        </ul>
+      </div>
+      <div>
+        <div style="margin-top: 1.5rem;">
+          <a class="demo-link" href="https://radhikasahai.github.io/peptide_characterization/" target="_blank">Open Live Site ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 5. CHEMISTRY MODEL ─── -->
+  <section class="slide">
+    <div class="tag">Chemistry</div>
+    <h2>Chemical model</h2>
+    <ul>
+      <li><strong>20 standard L-amino acids</strong> (IUPAC one-letter alphabet)
+        <span class="detail">Validated input — rejects non-standard residues</span>
+      </li>
+      <li><strong>Linear amide coupling</strong> — C-terminal –COOH + incoming α–NH₂
+        <span class="detail">RDKit reaction SMARTS with separate templates for Gly and Pro</span>
+      </li>
+      <li><strong>Asp / Glu regioselectivity</strong> — side-chain carboxylates as methyl esters during assembly
+        <span class="detail">Default hydrolysis back to –COOH after chain completion</span>
+      </li>
+      <li><strong>Inspired by Merrifield SPPS</strong> — in silico stepwise peptide growth
+      </li>
+    </ul>
+  </section>
+
+  <!-- ─── 6. ASSEMBLY ALGORITHM ─── -->
+  <section class="slide">
+    <div class="tag">Implementation</div>
+    <h2>Assembly algorithm</h2>
+    <div class="columns">
+      <div>
+        <ul>
+          <li><strong>Validate</strong> — uppercase, strip whitespace, reject non-standard letters</li>
+          <li><strong>Initialize</strong> — start chain from first residue's building-block SMILES</li>
+          <li><strong>Extend</strong> — iteratively couple each residue via Gly / Pro / chiral amide SMARTS</li>
+          <li><strong>Deprotect</strong> — optionally hydrolyze Asp/Glu methyl esters</li>
+          <li><strong>Canonicalize</strong> — output canonical SMILES</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Key files</h3>
+        <ul>
+          <li><code>peptide_parser.py</code><span class="detail">Core validation, composition, coupling</span></li>
+          <li><code>peptide_synthesis.py</code><span class="detail">Sequence generation + build orchestration</span></li>
+          <li><code>peptide_visual.py</code><span class="detail">Descriptors, 2D/3D export</span></li>
+          <li><code>chem_utils.py</code><span class="detail">RDKit helpers</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 7. SEQUENCE GENERATION ─── -->
+  <section class="slide">
+    <div class="tag">Design</div>
+    <h2>Sequence generation</h2>
+    <div class="columns">
+      <div>
+        <ul>
+          <li><strong>Random</strong> — length N, uniform over 20 AAs
+            <span class="detail">Optional residue weighting</span>
+          </li>
+          <li><strong>Motif repeat</strong> — e.g. <code>RGD</code> × 2 with N-term flank
+            <span class="detail"><code>A</code> + <code>RGD</code> × 2 → <code>ARGDRGD</code></span>
+          </li>
+          <li><strong>Combinatorial</strong> — vary one position in a base sequence
+            <span class="detail">e.g. <code>AAAAA</code> pos 3 with <code>DE</code> → 2 variants</span>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <p>All generated sequences pass through the same assembly pipeline as manual input — same validation, same coupling, same descriptors.</p>
+        <p><code>build_peptide_library</code> processes batches and returns a library summary with aggregate statistics.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 8. ARCHITECTURE ─── -->
+  <section class="slide">
+    <div class="tag">Engineering</div>
+    <h2>Architecture</h2>
+    <div class="arch-grid">
+      <div class="arch-box">
+        <h3>Core library (Python)</h3>
+        <p>Parser, synthesis engine, visualization helpers. Zero web dependencies — usable as a CLI or import.</p>
+      </div>
+      <div class="arch-box">
+        <h3>REST API (FastAPI)</h3>
+        <p><code>/api/characterize</code>, <code>/api/generate</code>, <code>/api/benchmark</code>. Dockerized, deployed on Render.</p>
+      </div>
+      <div class="arch-box">
+        <h3>Web frontend</h3>
+        <p>Static HTML/CSS/JS on GitHub Pages. Streamlit app for interactive exploration.</p>
+      </div>
+      <div class="arch-box">
+        <h3>CI / Testing</h3>
+        <p>pytest suite, benchmark regression CSV (47 cases), GitHub Actions on every PR.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 9. TESTING & QA ─── -->
+  <section class="slide">
+    <div class="tag">Quality</div>
+    <h2>Testing &amp; validation</h2>
+    <div class="columns">
+      <div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-number">47</div>
+            <div class="stat-label">benchmark cases</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">39</div>
+            <div class="stat-label">valid sequences</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">8</div>
+            <div class="stat-label">invalid edge cases</div>
+          </div>
+        </div>
+        <p>Golden SMILES in <code>data/benchmark_sequences.csv</code> — pytest compares live output on every PR.</p>
+      </div>
+      <div>
+        <h3>Coverage includes</h3>
+        <ul>
+          <li>Gly/Pro coupling edge cases</li>
+          <li>Asp/Glu protection &amp; hydrolysis</li>
+          <li>30–50 mer stress tests</li>
+          <li>API endpoint validation</li>
+          <li>Batch export correctness</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 10. BATCH EXPORT ─── -->
+  <section class="slide">
+    <div class="tag">Tooling</div>
+    <h2>Batch exports</h2>
+    <ul>
+      <li><code>scripts/export_peptide_visuals.py</code> — batch-process from CSV
+        <span class="detail">Input: <code>id, sequence, optional smiles</code></span>
+      </li>
+      <li>Per sequence: <strong>2D PNG</strong>, <strong>UFF 3D SDF</strong>, <strong>MMFF ligand SDF</strong></li>
+      <li>Use case: generate structure files for small libraries — figures or docking prep</li>
+    </ul>
+  </section>
+
+  <!-- ─── 11. FUTURE WORK ─── -->
+  <section class="slide">
+    <div class="tag">Looking ahead</div>
+    <h2>Future directions</h2>
+    <div class="columns">
+      <div>
+        <h3>Next steps</h3>
+        <ul>
+          <li>Cyclic peptide support</li>
+          <li>Non-standard / unnatural amino acids</li>
+          <li>Property prediction models (solubility, permeability)</li>
+          <li>Integration with docking workflows</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Current limitations</h3>
+        <ul>
+          <li>D-amino acids not yet supported</li>
+          <li>No cyclization or disulfide bonds</li>
+          <li>No post-translational modifications</li>
+          <li>Approximate pKa (no experimental states)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 12. REFERENCES ─── -->
+  <section class="slide">
+    <div class="tag">Appendix</div>
+    <h2>References</h2>
+    <ul class="ref-list">
+      <li>Bodanszky, M. (1993). <em>Principles of peptide synthesis</em> (2nd ed.). Springer.</li>
+      <li>Merrifield, R. B. (1963). Solid phase peptide synthesis. I. <em>J. Am. Chem. Soc.</em>, 85(21), 2149–2154.</li>
+      <li>Fields, G. B. &amp; Noble, R. L. (1990). Solid phase peptide synthesis utilizing Fmoc amino acids. <em>Int. J. Pept. Protein Res.</em>, 35(3), 161–214.</li>
+      <li>Landrum, G. et al. (2024). RDKit: Open-source cheminformatics. Zenodo. <a href="https://doi.org/10.5281/zenodo.591637">doi:10.5281/zenodo.591637</a></li>
+      <li>Weininger, D. (1988). SMILES. 1. Introduction and encoding rules. <em>J. Chem. Inf. Comput. Sci.</em>, 28(1), 31–36.</li>
+      <li>Lipinski, C. A. et al. (1997). Experimental and computational approaches to estimate solubility and permeability. <em>Adv. Drug Deliv. Rev.</em>, 23(1–3), 3–25.</li>
+      <li>Ertl, P. et al. (2000). Fast calculation of molecular polar surface area. <em>J. Med. Chem.</em>, 43(20), 3714–3717.</li>
+      <li>Halgren, T. A. (1996). Merck molecular force field (MMFF94). <em>J. Comput. Chem.</em>, 17(5–6), 490–519.</li>
+      <li>Rappé, A. K. et al. (1992). UFF, a full periodic table force field. <em>J. Am. Chem. Soc.</em>, 114(25), 10024–10035.</li>
+      <li>Riniker, S. &amp; Landrum, G. A. (2015). Better informed distance geometry. <em>J. Chem. Inf. Model.</em>, 55(12), 2562–2574.</li>
+      <li>Rogers, D. &amp; Hahn, M. (2010). Extended-connectivity fingerprints. <em>J. Chem. Inf. Model.</em>, 50(5), 742–754.</li>
+      <li>Lovering, F. et al. (2009). Escape from flatland. <em>J. Med. Chem.</em>, 52(21), 6752–6756.</li>
+      <li>Wildman, M. D. &amp; Crippen, G. M. (1999). Prediction of physicochemical parameters by atomic contributions. <em>J. Chem. Inf. Comput. Sci.</em>, 39(4), 868–873.</li>
+      <li>IUPAC-IUBMB (1984). Nomenclature and symbolism for amino acids and peptides. <em>Eur. J. Biochem.</em>, 138(1), 9–37.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 13. CLOSING ─── -->
+  <section class="slide center">
+    <h1>Thank you</h1>
+    <p class="subtitle">Questions?</p>
+    <p style="margin-top: 2rem; font-size: 0.9rem;">
+      <a href="https://github.com/radhikasahai/peptide_characterization">GitHub</a>
+      &nbsp;·&nbsp;
+      <a href="https://radhikasahai.github.io/peptide_characterization/">Live site</a>
+    </p>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="counter" id="counter"></div>
+<div class="nav-hint" id="navHint">← → arrow keys to navigate</div>
+
+<script>
+(function () {
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var current = 0;
+
+  function show(idx) {
+    if (idx < 0 || idx >= total) return;
+    slides[current].classList.remove('active');
+    current = idx;
+    slides[current].classList.add('active');
+    document.getElementById('progress').style.width =
+      ((current + 1) / total * 100) + '%';
+    document.getElementById('counter').textContent =
+      (current + 1) + ' / ' + total;
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); show(current + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); show(current - 1); }
+    if (e.key === 'Home') { e.preventDefault(); show(0); }
+    if (e.key === 'End') { e.preventDefault(); show(total - 1); }
+    // hide nav hint after first interaction
+    var hint = document.getElementById('navHint');
+    if (hint) hint.style.opacity = '0';
+  });
+
+  // click left/right halves to navigate
+  document.getElementById('deck').addEventListener('click', function (e) {
+    if (e.clientX < window.innerWidth / 2) show(current - 1);
+    else show(current + 1);
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>
