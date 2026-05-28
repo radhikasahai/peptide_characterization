@@ -125,6 +125,7 @@ python peptide_visual.py
 Interactive app: **GitHub Pages frontend** (`docs/`) + **FastAPI backend** (`api/`).
 
 Live site: **https://radhikasahai.github.io/peptide_characterization/**
+Presentation: **https://radhikasahai.github.io/peptide_characterization/presentation.html**
 
 ### Local development
 
