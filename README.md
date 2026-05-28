@@ -18,7 +18,7 @@ conda env create -f environment.yml
 conda activate peptide
 ```
 
-## Synthetic peptides (Phase 1)
+## Synthetize Peptides
 
 Generate sequences and build structures with `peptide_synthesis.py`:
 
